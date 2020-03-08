@@ -61,7 +61,7 @@
        
        
        (for [item @data]
-          (let [name (get item "category_id" )]
+          (let [name (get item "name" )]
            [:button {:key name :style {:background-color "green"}} name]))
        
        
