@@ -60,9 +60,11 @@
        ;(js/console.log (map   #([:p(second(second %))]) @data))
        
        
-       (for [item @data]
+      (for [item @data]
           (let [name (get item "name" )]
-           [:button {:key name :style {:background-color "green"}} name]))
+           [:div
+           [:input {:type "checkbox" :checked "1":key name :style {:background-color "green"}}]
+           [:b name]]))
        
        
        [:p "category_id"]
