@@ -63,7 +63,28 @@
       (for [item @data]
           (let [name (get item "name" )]
            [:div
-           [:input {:type "checkbox" :checked "1":key name :style {:background-color "green"}}]
+           [:input {:type "checkbox" :checked "1":key name :style {:background-color "green"}}:on-click
+           (fn[]
+            ;(for [item @data]
+             (js/console.log (str "Lufkuu---> "
+                  (reduce
+                    #(let [c_id (get %2 "category_id")] (
+                      str %
+                      (if (isChecked c_id)
+                              (str c_id ",")) ))
+                    ""
+                    @data
+                  ) 
+                  )
+                  ;(-> js/document
+                  ;    (.getElementById (str (get item "category_id")))
+                  ;      (.-checked)))
+              )
+           ;)
+           )
+            
+            
+            ]
            [:b name]]))
        
        
