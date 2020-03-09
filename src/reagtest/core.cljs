@@ -1,7 +1,8 @@
 (ns reagtest.core
     (:require
       [reagent.core :as r]
-      [ajax.core :refer [GET]]))
+      [ajax.core :refer [GET]]
+    ))
 
 
 
@@ -9,18 +10,23 @@
 
 (defonce valuee (r/atom 212))
 
+(defonce testiii (r/atom false))
 ;; -------------------------
 ;; Views
 
 
 
-(defn fetch-link! [data] 
-  (GET "https://juu.azurewebsites.net/read_categories.php" 
-    {:handler #(reset! data %) } )
+
+
+(defn fetch-link! [data]
+  (GET "https://juu.azurewebsites.net/read_categories.php"
+    {:handler #(
+
+      reset! data %) } )
     )
 
-(defn fetch-link-bb! [data] 
-  (GET "https://breaking-bad-quotes.herokuapp.com/v1/quotes" 
+(defn fetch-link-bb! [data]
+  (GET "https://breaking-bad-quotes.herokuapp.com/v1/quotes"
     {:handler #(reset! data %) } )
     )
 
@@ -32,7 +38,13 @@
   [:input {:type "text"
            :value @value
            :on-change #(reset! value (-> % .-target .-value))}])
-
+(defn isChecked[c_id]
+  (-> js/document
+    (.getElementById c_id)
+    (.-checked)
+        ;(set! false)
+    )
+  )
 (defn shared-state []
   (let [val (r/atom "foo") data (r/atom nil) databb (r/atom nil)]
     (fetch-link! data)
@@ -49,7 +61,7 @@
        [:br][:a {:href "https://reagent-project.github.io/" :target "_blank"} "Reagent: Minimalistic React for ClojureScript"]
        [:br][:a {:href "" :target "_blank"} ""]
        [:br][:a {:href " " :target " _blank "} ""]
-       
+
        (js/console.log (str "Tyyppi::" (type @databb)))
        [:p author]
 
@@ -58,12 +70,12 @@
 
        ;(js/console.log (map   #([:p(second(second %))]) @data))
        ;(js/console.log (map   #([:p(second(second %))]) @data))
-       
-       
-      (for [item @data]
-          (let [name (get item "name" )]
+
+
+       (for [item @data]
+          (let [name (get item "name" ) c_id (get item "category_id" )]
            [:div
-           [:input {:type "checkbox" :checked "1":key name :style {:background-color "green"}}:on-click
+           [:input {:type  "checkbox"  :id c_id :defaultChecked  true :key name :style {:background-color "green"}:on-click
            (fn[]
             ;(for [item @data]
              (js/console.log (str "Lufkuu---> "
@@ -81,22 +93,19 @@
                   ;      (.-checked)))
               )
            ;)
-           )
-            
-            
-            ]
+           )}]
            [:b name]]))
-       
-       
+      ;[: div (map #(vector :b (get % "name"))) @data]
+
        [:p "category_id"]
        [:p "The value is now: " @val]
        [:p "Change it here: " [atom-input val]]]))))
 
 (defn home-page []
- 
+
 
   [:div
-        [:h3 "16:23 Tervetuloa"]
+        [:h3 "21:23 Tervetuloa"]
         [:p @valuee]
         [shared-state]
         [:button  {:on-click (fn[] (swap! valuee inc))} @valuee]
