@@ -1,100 +1,89 @@
 (ns reagtest.core
     (:require
-      [reagent.core :as r]
-      [ajax.core :refer [GET]]))
+     [reagent.core :as r]
+     [re-frame.core :as rf]
+     [day8.re-frame.http-fx]
+     [kehys.db :as db]
+     [kehys.subs :as subs]
+     [kehys.events :as events]
+     [ajax.core :as ajax :refer [GET POST PUT]]))
 
-(defonce my-atom (r/atom 11))
-(defonce valuee (r/atom ""))
-(defonce databb (r/atom nil))
-(defonce cate (r/atom ""))
+(defn dangerous
+  ([comp content]
+   (dangerous comp nil content))
+  ([comp props content]
+   [comp (assoc props :dangerouslySetInnerHTML {:__html content})]))
 
-(defn fetch-link! [data]
-  (GET "https://juu.azurewebsites.net/read_categories.php"
-    {:handler #(reset! data %) } )
-    )
+(defn diivi [id sisus]
+  (dangerous :div {:id id
+                   :key id
+                   :flex 1
+                   :style {:padding 10
+                           :margin 5
+                           :border "dotted 1"
+                           :border-color "lightblue"
+                           :background-color "lightgrey"}
+                   :on-click  #(rf/dispatch [:valitse_juttu id])}  (str sisus)))
+(defn editoi [id sisus] [:div [:textarea {:id id
+                                          :on-change #(rf/dispatch [:value-change  (-> % .-target .-value)])
 
-(defn fetch-link-bb! []
-  (GET (str "https://juu.azurewebsites.net/filter_movies_by_category.php?title=" @valuee "&flt=" @cate)
-    {:handler #(reset! databb %) } )
-    )
-
-
-
-    (defn isChecked[c_id]
-      (-> js/document
-        (.getElementById c_id)
-        (.-checked)
-            ;(set! false)
-        )
-      )
-
-(defn atom-input [value]
-  [:input {:type "text"
-           :value @valuee
-           :on-change #(do (reset! valuee (-> % .-target .-value)) (fetch-link-bb!) )}])
-
-(defn shared-state []
-  (let [val (r/atom "foo") data (r/atom nil) ]
-    (fetch-link! data)
-    (fetch-link-bb!)
-    (fn []
-      (let [{:strs [category_id ]} (first @data) {:strs [title]} (first @databb)]
-      [:article [:div {:id "movieDiv"}
-      [:div [:p "Change it here: " [atom-input val]]]
+                                          :on-focus-out #(js/console.log "focus out" %)
+                                          :cols 57
+                                          :rows 7
+                                          :wrap "hard"
+                                          :defaultValue sisus}]])
 
 
-       (for [item @data]
-          (let [name (get item "name" ) c_id (get item "category_id" )]
+(defn kanava_valikko [id name]
+  [:div
+   [:button {:type  "button"
+             :id id
+             :on-click #(rf/dispatch [:valinta (-> % .-target .-id)])} name]])
 
-          [:aside
-            [:div  {:id "categoriaDiv"}
-              [:input {:type "checkbox"
-                       :id c_id
-                       :name "in"
-                       :key c_id
-                       :style {:background-color "green"}
-                       :on-click
-                         (fn[]
-                            (reset! cate
-                                (reduce
-                                  #(let [c_id (get %2 "category_id")] (
-                                    str %
-                                    (if (isChecked c_id)
-                                            (str (if (< 0 (count %)) ",") c_id )) ))
-                                  ""
-                                  @data )) (fetch-link-bb!))
-              }]
-              [:b name]]]))]
-              [:table
-              (for [item @databb]
-                 (let [tit (get item "title" ) des (get item "description" )]
-                  [:tr
-                    [:td tit]
-                    [:td des]]
-
-                 ))
-]
-       [:p "category_id"]
-       [:p "The value is now: " @val]
-       ]))))
 
 (defn home-page []
+  
+   (let [kanavat  (rf/subscribe [::subs/categories])
+         muuvi (rf/subscribe [::subs/muuvi]) 
+         valittu_id (rf/subscribe [::subs/valittu_juttu_id])
+         uusi_id (rf/subscribe [::subs/uusi_id])
+         valittu_juttu (rf/subscribe [::subs/valittu_juttu])]
+     [:div {:style {:display "flex"}}
+    
+      (when (< 0 @uusi_id)
+        (rf/dispatch [:valitse_juttu @uusi_id]))
+      [:div {:hidden false :style {:width 80}}
+       (map #(kanava_valikko (:id %) (:otsikko %)) @kanavat)
+       [:br]
+       [:button  {:on-click #(rf/dispatch [:uusi-juttu])} "UUSI"]]
 
 
-  [:div
-        [:h3 "Tervetuloa"]
-        [:p @valuee]
-        [shared-state]
-        [:button  {:on-click (fn[] (swap! valuee inc))} @valuee]
-        [:p]])
+      [:div  {:style {:flex 1 :border "solid 0px"}}
+
+       [:div
+        (if (not= 0 @valittu_id)
+          (editoi @valittu_id @valittu_juttu)
+          (do  (js/console.log "maara-> " (count @muuvi))
+               (map #(when (not= 0 (:id %))
+                       (diivi (:id %) (:teksti %))) @muuvi)))]  
+       (when (not= 0 @valittu_id)
+         (diivi 0 (clojure.string/replace @valittu_juttu "\n" "<br>")))]])
+  
+  )
+
 
 
 
 ;; -------------------------
 ;; Initialize app
 
+
 (defn mount-root []
   (r/render [home-page] (.getElementById js/document "app")))
 
 (defn init! []
+  (rf/dispatch-sync [::events/initialize-db])
+  (rf/dispatch [:get-api-data :categories "https://juu.azurewebsites.net/lue_kanavat.php"])
+  (rf/dispatch [:valinta 1])
+
   (mount-root))
