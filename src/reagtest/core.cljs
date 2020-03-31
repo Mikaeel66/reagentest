@@ -83,7 +83,8 @@
 
 (defn init! []
   (rf/dispatch-sync [::events/initialize-db])
-  (rf/dispatch [:get-api-data :categories "https://juu.azurewebsites.net/lue_kanavat.php"])
+  (rf/dispatch [:get-api-data :categories "http://mikaeel.rf.gd/lue_kanavat.php"])
+  ;(rf/dispatch [:get-api-data :categories "https://juu.azurewebsites.net/lue_kanavat.php"])
   (rf/dispatch [:valinta 1])
 
   (mount-root))
