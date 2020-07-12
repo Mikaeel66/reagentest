@@ -49,7 +49,8 @@
          uusi_id (rf/subscribe [::subs/uusi_id])
          valittu_juttu (rf/subscribe [::subs/valittu_juttu])]
      [:div {:style {:display "flex"}}
-    
+        (def ddd (js/Date.))
+        [:h1 (str "AIKA->" (.getHours dd))]
       (when (< 0 @uusi_id)
         (rf/dispatch [:valitse_juttu @uusi_id]))
       [:div {:hidden false :style {:width 80}}
