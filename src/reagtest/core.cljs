@@ -41,7 +41,7 @@
              :on-click #(rf/dispatch [:valinta (-> % .-target .-id)])} name]])
 
 (defn home-page []
-    [:h1 "toimii"]
+    [:h1 (str "AIKA->" (.getHours (js/Date.))) ]
     )
 
 (defn vara_home-page []
