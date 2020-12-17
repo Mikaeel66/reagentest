@@ -40,9 +40,10 @@
              :id id
              :on-click #(rf/dispatch [:valinta (-> % .-target .-id)])} name]])
 
-(defn vara_home-page []
+(defn home-page []
     [:h1 "toimii"]
     )
+
 (defn vara_home-page []
   
    (let [kanavat  (rf/subscribe [::subs/categories])
