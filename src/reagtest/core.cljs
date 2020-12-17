@@ -40,8 +40,10 @@
              :id id
              :on-click #(rf/dispatch [:valinta (-> % .-target .-id)])} name]])
 
-
-(defn home-page []
+(defn vara_home-page []
+    [:h1 "toimii"]
+    )
+(defn vara_home-page []
   
    (let [kanavat  (rf/subscribe [::subs/categories])
          muuvi (rf/subscribe [::subs/muuvi]) 
@@ -84,7 +86,7 @@
 
 (defn init! []
   (rf/dispatch-sync [::events/initialize-db])
-  (rf/dispatch [:get-api-data :categories "https://juu.azurewebsites.net/lue_kanavat.php"])
+  ;(rf/dispatch [:get-api-data :categories "https://juu.azurewebsites.net/lue_kanavat.php"])
   (rf/dispatch [:valinta 1])
 
   (mount-root))
